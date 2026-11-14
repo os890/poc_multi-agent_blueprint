@@ -1,0 +1,23 @@
+flowchart TD
+    M([Maintainer]) -->|"starts all agents<br/>at the beginning"| C
+    M <-->|"/milestone-coordinator start<br/>status / pause / resume"| C["milestone-coordinator<br/>skill: milestone-coordinator"]
+    C <-->|"start, pause, resume, gaps, goal met,<br/>rejected, decision /<br/>escalate, paused, gate green, milestone ready,<br/>merge failed, retro done"| T["milestone-task-manager<br/>skill: milestone-task-manager<br/>reads: reviews.md<br/>lessons-learned.md<br/>merge-recovery.md<br/>retrospective.md"]
+    WL[("watcher log<br/>+ 10-min tick")] -.->|"background monitor<br/>in its session"| T
+    T <-->|"assign, fix, stop /<br/>ready, done, stopped, blocked"| W["milestone-worker 1..n<br/>skill: milestone-worker"]
+    T <-->|"review /<br/>ready, reviewed, blocked"| R["milestone-reviewer<br/>skill: milestone-reviewer<br/>validates findings"]
+    R -->|"starts one fresh<br/>sub-agent per type"| RT["milestone-review-type<br/>skill: milestone-review-type<br/>reads: types/&lt;type&gt;.md,<br/>lessons learned"]
+    T <-->|"run minimal / full /<br/>ready, tests"| X["milestone-test-runner<br/>skill: milestone-test-runner"]
+    R <-->|"repro /<br/>reproduced, not reproduced"| X
+
+    classDef human fill:#fff3bf,stroke:#e8a400,color:#000
+    classDef coord fill:#d0ebff,stroke:#1c7ed6,color:#000
+    classDef tm fill:#e5dbff,stroke:#7048e8,color:#000
+    classDef worker fill:#d3f9d8,stroke:#2f9e44,color:#000
+    classDef review fill:#ffe3e3,stroke:#e03131,color:#000
+    classDef git fill:#f1f3f5,stroke:#495057,color:#000
+    class M human
+    class C coord
+    class T tm
+    class W worker
+    class R,RT,X review
+    class WL git

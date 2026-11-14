@@ -1,0 +1,18 @@
+flowchart TD
+    MAIN[("main")]
+    MS[("milestone-&lt;slug&gt;<br/>only integration branch")]
+    T1[("task-&lt;id&gt;-&lt;slug&gt;")]
+    T2[("task-&lt;id&gt;-&lt;slug&gt;<br/>fix, gap, sync or<br/>compensation task")]
+    MR[("milestone review<br/>task branch<br/>report commits only")]
+    MAIN --> MS
+    MS --> T1
+    MS --> T2
+    MS -->|"after the gate;<br/>later merges via<br/>$BNG update"| MR
+    MAIN -.->|"sync: merged into<br/>a task branch"| T2
+    T1 -.->|"merge: agent review<br/>+ minimal suite"| MS
+    T2 -.-> MS
+    MR ==>|"watcher merge after the<br/>manual review approved"| MAIN
+    classDef git fill:#f1f3f5,stroke:#495057,color:#000
+    classDef human fill:#fff3bf,stroke:#e8a400,color:#000
+    class MAIN,MS,T1,T2 git
+    class MR human

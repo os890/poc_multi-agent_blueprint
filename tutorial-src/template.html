@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-Agent Milestone Workflow</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --surface-2: #f3f4f6; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #5b3fd6; --accent-soft: #ede9fe; --code-bg: #f1f3f5; --warn-bg: #fff7e0; --warn-border: #e8a400;
+  --ok-bg: #e9f8ee; --ok-border: #2f9e44; --danger-bg: #ffecec; --danger-border: #e03131;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171b; --surface: #1d2026; --surface-2: #252932; --text: #e6e8eb; --muted: #9aa4b2; --border: #343a46;
+    --accent: #a995ff; --accent-soft: #2c2547; --code-bg: #262a33; --warn-bg: #3a2f12; --warn-border: #d39b00;
+    --ok-bg: #16301f; --ok-border: #3fb35a; --danger-bg: #3a1c1c; --danger-border: #f06262;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171b; --surface: #1d2026; --surface-2: #252932; --text: #e6e8eb; --muted: #9aa4b2; --border: #343a46;
+  --accent: #a995ff; --accent-soft: #2c2547; --code-bg: #262a33; --warn-bg: #3a2f12; --warn-border: #d39b00;
+  --ok-bg: #16301f; --ok-border: #3fb35a; --danger-bg: #3a1c1c; --danger-border: #f06262;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+main { max-width: 960px; margin: 0 auto; padding: 32px 16px 80px; }
+header.hero { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 28px; }
+.eyebrow { color: var(--accent); font-weight: 600; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+h1 { font-size: 34px; line-height: 1.2; margin: 6px 0 10px; }
+h2 { font-size: 24px; margin: 48px 0 12px; padding-top: 8px; border-top: 1px solid var(--border); }
+h3 { font-size: 18px; margin: 28px 0 8px; }
+p, li { max-width: 78ch; }
+a { color: var(--accent); }
+.lead { font-size: 18px; color: var(--muted); margin: 0; }
+.meta { color: var(--muted); font-size: 14px; margin-top: 10px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; background: var(--code-bg); padding: .1em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-size: 14px; line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; overflow-wrap: normal; }
+.table-wrap { overflow-x: auto; margin: 12px 0 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+th { background: var(--surface-2); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+nav.toc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; margin: 0 0 8px; }
+nav.toc ol { margin: 6px 0 0; padding-left: 22px; columns: 2; column-gap: 32px; }
+nav.toc li { break-inside: avoid; }
+@media (max-width: 640px) { nav.toc ol { columns: 1; } h1 { font-size: 28px; } }
+.figure { background: #ffffff; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin: 16px 0 6px; overflow-x: auto; }
+.figure svg { display: block; margin: 0 auto; height: auto; }
+.figure.narrow svg { max-width: 640px !important; }
+.figure.tall svg { min-width: 680px; }
+.figure.narrow svg { min-width: 420px; }
+.caption { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+.callout { border-left: 4px solid var(--warn-border); background: var(--warn-bg); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 14px 0; }
+.callout.ok { border-color: var(--ok-border); background: var(--ok-bg); }
+.callout.danger { border-color: var(--danger-border); background: var(--danger-bg); }
+.callout p { margin: 4px 0; }
+.steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+.step { max-width: none; position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px 8px 60px; margin: 14px 0; }
+.step::before { counter-increment: step; content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 15px; }
+.step h3 { margin: 2px 0 6px; }
+.step p, .step li { max-width: none; }
+.tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); vertical-align: middle; }
+a.tag { text-decoration: none; }
+.tag.open { background: var(--warn-bg); color: var(--text); border: 1px solid var(--warn-border); }
+.roles { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 14px 0; }
+.role { background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--c); border-radius: 10px; padding: 12px 14px; }
+.role h4 { margin: 0 0 4px; font-size: 16px; }
+.role p { margin: 0; font-size: 14.5px; color: var(--muted); }
+.open-points h3 { font-size: 17px; }
+.open-points ol { padding-left: 32px; }
+.open-points li { margin: 6px 0; }
+footer { margin-top: 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--border); padding-top: 14px; }
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <div class="eyebrow">Tutorial · draft</div>
+  <h1>Multi-agent milestone workflow</h1>
+  <p class="lead">Setting up a new project so that several AI agents work through the tasks of a milestone on their
+  own, and the maintainer reviews only the finished milestone before it reaches <code>main</code>.</p>
+  <p class="meta">Project-agnostic. Status: brainstorming draft, 2026-11-11. Rules that are not decided yet are marked
+  <span class="tag open">OPEN #n</span> and listed in <a href="#open">Open topics</a>.</p>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#idea">The idea</a></li>
+    <li><a href="#flow">How a milestone runs</a></li>
+    <li><a href="#prereq">Prerequisites</a></li>
+    <li><a href="#setup">Setup step by step</a></li>
+    <li><a href="#run">Running a milestone</a></li>
+    <li><a href="#agents">Agents and skills</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#guards">Guardrails</a></li>
+    <li><a href="#retro">Retrospective and improvement</a></li>
+    <li><a href="#open">Open topics</a></li>
+  </ol>
+</nav>
+
+<h2 id="idea">1. The idea</h2>
+<p>In a classic feature-branch workflow with manual review, every single task waits for the maintainer. Here the
+human gate moves up one level: <strong>tasks are implemented, reviewed and merged by agents</strong>
+into a milestone branch, and <strong>only the whole milestone</strong> gets a full test run, a full review and the
+maintainer's manual review before it is merged into <code>main</code>.</p>
+<ul>
+  <li><code>main</code> stays the base for everything; nothing reaches it without the maintainer's approval.</li>
+  <li>Work is planned in milestones, tasks and sub-tasks (Backlog.md, managed with backlog-ng).</li>
+  <li>Per task: the <strong>minimal test suite</strong> (fast tests). Per milestone: the <strong>full test
+  suite</strong> including end-to-end tests. A regression becomes a fix task before the manual review.</li>
+  <li>Reviews look only at new and changed code, report only real findings, and stop after a fixed number of rounds
+  (Pareto principle) instead of looping.</li>
+</ul>
+
+<div class="roles">
+  <div class="role" style="--c:#e8a400"><h4>Maintainer</h4><p>Gives the goal, approves the plan, answers escalations, does the manual review of the milestone.</p></div>
+  <div class="role" style="--c:#1c7ed6"><h4>Coordinator</h4><p>The only agent the maintainer talks to. Plans, supervises, guards against chat loops, checks the goal, hands over.</p></div>
+  <div class="role" style="--c:#7048e8"><h4>Task manager</h4><p>Owns the task flow: assigns tasks, runs reviews with a Pareto limit, merges, runs the milestone gate and the retrospective.</p></div>
+  <div class="role" style="--c:#2f9e44"><h4>Workers (1..n)</h4><p>Implement one task at a time on their own branch and worktree, run the minimal suite, commit.</p></div>
+  <div class="role" style="--c:#e03131"><h4>Reviewer</h4><p>Starts one fresh sub-agent per review type on the diff, validates their findings and reports only the confirmed ones. Changes nothing.</p></div>
+  <div class="role" style="--c:#e03131"><h4>Test runner</h4><p>Runs the minimal or full suite, separates flaky from real failures, bisects regressions to a task, reproduces findings for the reviewer.</p></div>
+</div>
+<p>The maintainer starts all these agents at the beginning of the run. No agent starts another long-running agent;
+only the reviewer starts sub-agents, one fresh one per review type and review. <span class="tag open">OPEN #4</span></p>
+
+<h2 id="flow">2. How a milestone runs</h2>
+<div class="figure tall">{{SVG_WORKFLOW}}</div>
+<p class="caption">The whole flow. Colours: yellow = maintainer, blue = coordinator, purple = task manager,
+green = worker, red = reviews and tests, grey = git.</p>
+
+<h3>Branches</h3>
+<div class="figure narrow">{{SVG_BRANCHES}}</div>
+<p class="caption">Solid lines: a branch is created from another (the milestone review branch later also gets the
+milestone branch's merges through <code>$BNG update</code>). Dotted lines: merges after the agents' review. Bold line: the only merge into <code>main</code>, by the watcher after
+the maintainer's manual review.</p>
+<ul>
+  <li><code>milestone-&lt;slug&gt;</code> is the only integration branch. The task manager creates it from
+  <code>main</code>, with its own worktree (the milestone checkout), before the first task starts.</li>
+  <li>Every code change reaches it through a task branch: normal tasks, and fix, gap, sync or compensation tasks,
+  also after the hand-off. Before the gate, a sync task merges <code>main</code> in if <code>main</code> has moved.</li>
+  <li>The milestone review task's branch starts from the milestone branch after the gate and targets
+  <code>main</code>. It gets only the milestone review report and, via <code>$BNG update</code>, later merges of the
+  milestone branch. The commits of tasks already merged into the milestone branch count as approved.</li>
+  <li>Nothing merged is ever rewritten; agents never rebase.</li>
+</ul>
+
+<h2 id="prereq">3. Prerequisites</h2>
+<div class="table-wrap"><table>
+<tr><th>What</th><th>Why</th></tr>
+<tr><td>A git repository with <code>main</code> as integration branch</td><td>Base for milestone branches</td></tr>
+<tr><td>backlog-ng with <strong>milestone branches</strong> (<code>BNG_MILESTONE_BRANCHES=yes</code>)</td><td>Board (Backlog.md), review app, commit watcher with auto-merge and quality gate</td></tr>
+<tr><td>Claude Code with sub-agents, skills and agent teams</td><td>All agents started by the maintainer (teammates of one team or separate sessions); review-type sub-agents started by the reviewer <span class="tag open">OPEN #4</span></td></tr>
+<tr><td>A test setup with two levels: minimal and full</td><td>Fast feedback per task, complete check per milestone</td></tr>
+<tr><td>Written requirements and specs (PRD, specs, architecture decisions)</td><td>What the logic, architecture and usability reviews check against</td></tr>
+<tr><td>Global safety rules: package installs only with <code>--ignore-scripts</code>, outbound web access only to whitelisted domains</td><td>Supply-chain safety; agents run with wide permissions</td></tr>
+</table></div>
+
+<h2 id="setup">4. Setup step by step</h2>
+<ol class="steps">
+
+<li class="step">
+<h3>Install backlog-ng with milestone branches</h3>
+<p>Run the backlog-ng template's bootstrap for the new project and answer <em>yes</em> to milestone branches:</p>
+<pre><code>./bootstrap.sh --name "&lt;Project&gt;" --project-dir &lt;path/to/project&gt; --milestone-branches yes
+# or without flags: question mode asks every setting, incl. run mode, ports and the quality-gate script</code></pre>
+<p>Then start the apps (<code>&lt;backlog-ng&gt;/backlog-ng.sh up</code>) and open the board and the review app.
+Note the path of the runner: the skills call it <code>$BNG</code>.</p>
+<div class="callout"><p>Milestone branches need a backlog-ng version that contains them (still in review in the template).
+Agent-approved task reviews are not supported yet <span class="tag open">OPEN #3</span>: until then the task manager
+merges task branches into the milestone branch itself.</p></div>
+</li>
+
+<li class="step">
+<h3>Configure the board</h3>
+<ul>
+  <li>Labels: <code>milestone-review</code> (milestone review task), <code>review</code> (drafts from reviews),
+  <code>workflow</code> (improvement tasks from the retrospective).</li>
+  <li>Statuses: To Do, In Progress, In Review, Done.</li>
+  <li>Definition of done per task: task branch, minimal suite green, acceptance criteria covered by tests, agent
+  review recorded in the notes. The manual review item belongs to the milestone review task only.</li>
+</ul>
+</li>
+
+<li class="step">
+<h3>Provide two test commands</h3>
+<div class="table-wrap"><table>
+<tr><th>Command</th><th>Content</th><th>Runs</th></tr>
+<tr><td>minimal</td><td>Fast unit and integration tests; target: a few minutes</td><td>per task, after every merge into the milestone branch</td></tr>
+<tr><td>full</td><td>Everything, incl. end-to-end, container and platform tests</td><td>once after the last task, after fixes, before the hand-off</td></tr>
+</table></div>
+<p>A common way: one quality-gate script with a flag for the full run, and slow tests marked with a tag so the
+minimal run can exclude them. The quality-gate script is also what backlog-ng's watcher runs before a merge.
+<span class="tag open">OPEN #12</span></p>
+</li>
+
+<li class="step">
+<h3>Install the agents and skills</h3>
+<pre><code>P=&lt;path/to/project&gt;
+mkdir -p "$P/.claude/skills" "$P/.claude/agents"
+cp -R skills/milestone-* "$P/.claude/skills/"
+cp agents/milestone-*.md "$P/.claude/agents/"</code></pre>
+<p>This installs one agent definition and one skill per agent (see <a href="#agents">Agents and skills</a>).</p>
+</li>
+
+<li class="step">
+<h3>Describe the project in <code>CLAUDE.md</code></h3>
+<p>The skills are project-agnostic; everything project-specific comes from the project's <code>CLAUDE.md</code>:</p>
+<pre><code>## Multi-agent milestone workflow
+- BNG: &lt;path to backlog-ng.sh&gt;
+- Minimal test command: &lt;command&gt;
+- Full test command: &lt;command&gt;
+- Docs the reviewers check against: &lt;requirements&gt;, &lt;specs&gt;, &lt;architecture decisions&gt;
+- Lessons learned: docs/lessons-learned.md  (created by the task manager with the first lesson)
+- Watcher log: &lt;path&gt;  (the task manager's monitor reads it)
+- Supported platforms: &lt;list&gt;  (cross-platform review)
+- Project conventions: &lt;commit format, code rules, UI spec&gt;</code></pre>
+</li>
+
+<li class="step">
+<h3>Add the hooks for the hard rules</h3>
+<p>Skills are guidance; these rules must be enforced by hooks <span class="tag open">OPEN #35</span>:</p>
+<div class="table-wrap"><table>
+<tr><th>Rule</th><th>Hook</th></tr>
+<tr><td>No agent merges into, commits on or pushes <code>main</code></td><td>before Bash: block <code>git merge</code>/<code>commit</code>/<code>push</code> affecting <code>main</code></td></tr>
+<tr><td>Package installs only with <code>--ignore-scripts</code></td><td>before Bash: block install commands without it</td></tr>
+<tr><td>Web access only to whitelisted domains</td><td>before web tools and Bash network commands</td></tr>
+<tr><td>Loop guard: the 4th message about one task between the same two agents without a state change is blocked</td><td>before <code>SendMessage</code>: count, block with "escalate to the coordinator"</td></tr>
+<tr><td>Each agent writes only its own files: the coordinator only through <code>$BNG cli</code>, the reviewer only findings files, the test runner only logs and reports, the task manager only diff files, reports, the lessons file and the retrospective</td><td>before Bash, Edit and Write: block writes outside the agent's allowed paths</td></tr>
+</table></div>
+</li>
+
+<li class="step">
+<h3>Claude Code settings</h3>
+<ul>
+  <li>Decide how the agents run: as teammates of one agent team (the coordinator as lead) or as separate sessions
+  with another message channel. The reviewer must be able to start sub-agents. <span class="tag open">OPEN #4</span></li>
+  <li>The task manager starts a background monitor in its own session: watcher-log lines and a 10-minute tick
+  (stalled workers) wake it up. <span class="tag open">OPEN #38</span></li>
+  <li>Permission mode per agent, model per role, number of parallel workers, token budget.
+  <span class="tag open">OPEN #31</span> <span class="tag open">OPEN #32</span></li>
+</ul>
+</li>
+
+<li class="step">
+<h3>Dry run on a demo project</h3>
+<p>Before the first real milestone, run a small milestone (2-3 tiny tasks, one deliberate regression) on a demo
+project and check every path: review rounds, merge queue, full suite, goal check, hand-off, failed merge,
+retrospective. <span class="tag open">OPEN #36</span></p>
+</li>
+</ol>
+
+<h2 id="run">5. Running a milestone</h2>
+<div class="table-wrap"><table>
+<tr><th>Step</th><th>Maintainer</th><th>Agents</th></tr>
+<tr><td>Start</td><td>Starts all agents: coordinator, task manager, workers (1..n), reviewer, test runner <span class="tag open">OPEN #4</span>; then <code>/milestone-coordinator start</code></td><td>Each agent reports <code>ready</code> to the task manager; the coordinator asks for the goal</td></tr>
+<tr><td>Plan</td><td>States the goal; agrees on checkable success criteria; approves the task list</td><td>Coordinator stores the goal verbatim in the milestone, creates the tasks and the milestone review task</td></tr>
+<tr><td>Run</td><td><code>/milestone-coordinator status</code>, <code>pause</code>, <code>resume</code>; answers escalations</td><td>Task manager assigns tasks, workers implement, the reviewer reviews and validates, task manager merges into the milestone branch</td></tr>
+<tr><td>Gate</td><td>–</td><td>Full suite, milestone review (all 11 types), fix and regression tasks, goal check</td></tr>
+<tr><td>Hand-off</td><td>Reviews the milestone review task in the review app; approves or rejects</td><td>Coordinator reports: report file, goal check, tests, drafts, deferred critical/major findings, risks</td></tr>
+<tr><td>Merge</td><td>–</td><td>Watcher merges the milestone review branch (the whole milestone) into <code>main</code>; if it fails, the task manager finds the cause and compensates</td></tr>
+<tr><td>Retrospective</td><td>Approves or rejects the proposed skill improvements</td><td>Task manager writes the metrics and proposes the 1-3 most effective improvements</td></tr>
+</table></div>
+
+<h3>When the merge into main fails</h3>
+<div class="table-wrap"><table>
+<tr><th>Cause (watcher log)</th><th>Compensation by the task manager</th><th>New manual review</th></tr>
+<tr><td>Conflicts with <code>main</code> (it moved)</td><td>Compensation task: a worker merges <code>main</code> into its task branch and resolves the conflicts; review of the resolution only; merge into the milestone branch; full suite</td><td>only the new commits</td></tr>
+<tr><td>Quality gate red on the merged result</td><td>Regression task, fix on a task branch merged into the milestone branch, full suite</td><td>only the fix commits</td></tr>
+<tr><td>Technical (git busy, main checkout not clean, watcher or verify bridge down)</td><td>No code change; wait for the watcher's retry, otherwise escalate</td><td>no</td></tr>
+<tr><td>Unknown, or failed twice</td><td>Escalate with the log lines and what was tried</td><td>maintainer decides</td></tr>
+</table></div>
+<p>Approved commits are never rewritten; compensation is always new commits that reach the milestone branch through
+a task branch, then the milestone review branch through <code>$BNG update</code>.
+<span class="tag open">OPEN #18</span></p>
+
+<h2 id="agents">6. Agents and skills</h2>
+<p><strong>One skill per agent.</strong> Each agent definition preloads its skill, so the skill is active from the
+agent's first turn. Details needed only now and then are reference files next to the skill, read on demand.</p>
+<div class="figure narrow">{{SVG_AGENTS}}</div>
+<p class="caption">Which skill is active and which messages flow between the agents. The maintainer starts all
+long-running agents; the reviewer starts the review-type sub-agents.</p>
+
+<div class="table-wrap"><table>
+<tr><th>Agent</th><th>Runs as</th><th>Tools</th><th>Skill</th><th>Reference files</th></tr>
+<tr><td>milestone-coordinator</td><td>main session (lead)</td><td>read, shell, messages</td><td>planning, supervision, loop guard, goal check, hand-off</td><td>–</td></tr>
+<tr><td>milestone-task-manager</td><td>long-running, own milestone checkout</td><td>+ write (diff files, reports, lessons file, retrospective only)</td><td>dispatch, Pareto rule, merge queue, milestone gate, messages</td><td><code>reviews.md</code>, <code>lessons-learned.md</code>, <code>merge-recovery.md</code>, <code>retrospective.md</code></td></tr>
+<tr><td>milestone-worker (1..n)</td><td>long-running, own worktree per task</td><td>all</td><td>implement, test, commit, fix findings, report</td><td>the project's lessons-learned file</td></tr>
+<tr><td>milestone-reviewer</td><td>long-running</td><td>read, start sub-agents, messages, write (findings files only); no shell, no git</td><td>start the review-type sub-agents, validate findings, findings file</td><td><code>types/01-logic.md</code> … <code>11-test.md</code> (passed to the sub-agents)</td></tr>
+<tr><td>milestone-review-type</td><td>sub-agent, fresh per type and review</td><td>read only (no shell, no git)</td><td>scope, severity, finding format, lessons check</td><td>its type's checklist, the project's lessons-learned file</td></tr>
+<tr><td>milestone-test-runner</td><td>long-running, own worktree per request</td><td>read, shell, messages, write (logs and reports only)</td><td>minimal/full suite, flaky check, bisect, reproduction of findings</td><td>–</td></tr>
+</table></div>
+
+<h3>How the skills become active</h3>
+<ul>
+  <li><strong>Preloaded</strong>: listed under <code>skills:</code> in the agent definition. The normal way.</li>
+  <li><strong>User command</strong>: only the coordinator's skill is also a slash command
+  (<code>/milestone-coordinator start|status|pause|resume</code>). All other skills are hidden from the
+  maintainer's menu (<code>user-invocable: false</code>).</li>
+  <li><strong>Reference files</strong>: the skill says when to read which file, e.g. the reviewer passes each
+  sub-agent only its own type's checklist.</li>
+</ul>
+<div class="callout"><p>A skill with <code>disable-model-invocation: true</code> cannot be preloaded, so none of these
+skills uses it. Each description names its agent, so other agents don't pick it up by accident.</p></div>
+
+<h3>Messages</h3>
+<p>Typed, one task per message, no acknowledgements or small talk. Every message must lead to a state change.
+State lives in the task files; messages are only triggers.</p>
+<div class="table-wrap"><table>
+<tr><th>From → to</th><th>Messages</th></tr>
+<tr><td>worker, reviewer, test runner → task manager</td><td><code>ready &lt;role&gt;</code></td></tr>
+<tr><td>coordinator → task manager</td><td><code>start M&lt;n&gt;</code>, <code>pause</code>, <code>resume</code>, <code>gaps &lt;list&gt;</code>, <code>goal met</code>, <code>rejected &lt;list&gt;</code>, <code>decision TASK-&lt;id&gt;: &lt;answer&gt;</code></td></tr>
+<tr><td>task manager → coordinator</td><td><code>escalate TASK-&lt;id&gt;|M&lt;n&gt;: &lt;question&gt;</code>, <code>paused</code>, <code>gate green</code>, <code>milestone ready &lt;commit&gt;</code>, <code>merge failed &lt;cause&gt;: &lt;compensation&gt;</code>, <code>retro done &lt;file&gt;</code></td></tr>
+<tr><td>task manager → worker</td><td><code>assign TASK-&lt;id&gt;</code>, <code>fix TASK-&lt;id&gt;</code>, <code>stop TASK-&lt;id&gt;</code></td></tr>
+<tr><td>worker → task manager</td><td><code>done TASK-&lt;id&gt; &lt;commit&gt;</code>, <code>stopped TASK-&lt;id&gt; &lt;commit&gt;</code>, <code>blocked TASK-&lt;id&gt;: &lt;one line&gt;</code></td></tr>
+<tr><td>task manager → reviewer</td><td><code>review TASK-&lt;id&gt;|M&lt;n&gt; r&lt;n&gt; diff=… tree=… commit=… lessons=… [types=…]</code></td></tr>
+<tr><td>reviewer → task manager</td><td><code>reviewed &lt;review&gt;: &lt;c&gt; confirmed, &lt;d&gt; dropped &lt;file&gt;</code>, <code>blocked &lt;review&gt;: &lt;one line&gt;</code></td></tr>
+<tr><td>reviewer ↔ test runner</td><td><code>repro &lt;review&gt; f&lt;k&gt; commit=…: &lt;test or command&gt;</code> / <code>reproduced</code> | <code>not reproduced &lt;log&gt;</code></td></tr>
+<tr><td>task manager ↔ test runner</td><td><code>run minimal|full &lt;branch&gt; &lt;commit&gt;</code> / <code>tests &lt;suite&gt; &lt;branch&gt; &lt;commit&gt;: green|red|error &lt;report&gt;</code></td></tr>
+<tr><td>monitor → task manager</td><td>watcher log line, 10-minute tick (background monitor in its own session) <span class="tag open">OPEN #38</span></td></tr>
+<tr><td>hook → agent</td><td><code>blocked: escalate to the coordinator</code></td></tr>
+</table></div>
+
+<h2 id="reviews">7. Reviews</h2>
+<h3>Scope: only new and changed parts</h3>
+<div class="table-wrap"><table>
+<tr><th>Review</th><th>Diff</th></tr>
+<tr><td>Task review</td><td><code>git diff $(git merge-base milestone-&lt;slug&gt; &lt;task-branch&gt;)..&lt;task-branch&gt;</code></td></tr>
+<tr><td>Re-review after fixes</td><td>only the fix commits since the previous round</td></tr>
+<tr><td>Re-review after the worker merged the milestone branch in</td><td>the whole task diff again (logic, code, test)</td></tr>
+<tr><td>Milestone review</td><td><code>git diff $(git merge-base main milestone-&lt;slug&gt;)..milestone-&lt;slug&gt;</code></td></tr>
+</table></div>
+<ul>
+  <li>Unchanged code is read only for context. A problem in old code counts only if the change makes it reachable
+  or worse; anything else in old code is not reported.</li>
+  <li>Reviewers get the diff as a file and a checkout of the reviewed state for context, and run no git commands:
+  least privilege, and git commands in the maintainer's checkout can lock the repository while the watcher
+  merges.</li>
+  <li>Task branches are never rebased: a red or conflicting merge is aborted before it is committed, and the worker
+  merges the milestone branch into the task branch.</li>
+</ul>
+
+<h3>Reviewer and validation</h3>
+<ul>
+  <li>For each review the reviewer starts one fresh sub-agent per review type; it has never seen the code and gets
+  only its checklist, the diff, the tree and the lessons.</li>
+  <li>The reviewer validates every finding: format and scope, duplicates across types, and for critical and major
+  findings a re-read in context; where an existing test or a short command can show the defect, the test runner
+  reproduces it. Unconfirmed findings are dropped with a reason and counted.</li>
+  <li>The task manager gets only confirmed findings and applies the Pareto rule. A worker can dispute a confirmed
+  finding; the task manager decides.</li>
+</ul>
+
+<h3>To the point</h3>
+<p>Only findings, each with a concrete failure scenario: no summary, no praise, no general advice, no style
+preferences. The same defect at several places is one finding. Nothing found: exactly <code>0 findings</code>.</p>
+<pre><code>finding 1
+severity: critical | major | minor
+where:    path/to/file.ext:123 (changed line)
+what:     one sentence: the defect
+scenario: concrete input or state -&gt; wrong result, crash, data loss, ...
+fix:      one sentence: suggested fix
+lesson:   L-&lt;n&gt; (only if the finding breaks a lesson learned)</code></pre>
+<div class="table-wrap"><table>
+<tr><th>Severity</th><th>Meaning</th></tr>
+<tr><td>critical</td><td>security hole, data loss, crash or hang</td></tr>
+<tr><td>major</td><td>wrong result or freeze in normal use, missing safety check, broken platform feature</td></tr>
+<tr><td>minor</td><td>edge case, cosmetic, maintainability, missing test of non-risky code</td></tr>
+</table></div>
+
+<h3>Review types</h3>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>Type</th><th>Checks</th><th>Per task</th><th>Milestone</th></tr>
+<tr><td>1</td><td>Logic</td><td>acceptance criteria and requirements really met; tasks consistent with each other</td><td>always</td><td>yes</td></tr>
+<tr><td>2</td><td>Code</td><td>bugs, resource leaks, concurrency, error paths, unusual input</td><td>always</td><td>yes</td></tr>
+<tr><td>3</td><td>Architecture</td><td>layers, module boundaries, decisions that should be recorded</td><td>if structure changes</td><td>yes</td></tr>
+<tr><td>4</td><td>Security</td><td>input validation, path traversal, injection, secrets, logs</td><td>always</td><td>yes</td></tr>
+<tr><td>5</td><td>Data safety</td><td>code that reads, writes, moves or deletes user data</td><td>if it touches user data</td><td>yes</td></tr>
+<tr><td>6</td><td>Cross-platform</td><td>paths, scripts, behaviour on every supported platform</td><td>if platform code changes</td><td>yes</td></tr>
+<tr><td>7</td><td>Dependencies and licenses</td><td>need, maintenance, vulnerabilities, licenses, pinning, <code>--ignore-scripts</code></td><td>if dependencies change</td><td>yes</td></tr>
+<tr><td>8</td><td>Docs</td><td>docs and diagrams up to date with the change</td><td>–</td><td>yes</td></tr>
+<tr><td>9</td><td>Usability</td><td>wording, states, confirmations, accessibility</td><td>if UI changes</td><td>yes</td></tr>
+<tr><td>10</td><td>Code quality</td><td>readability, duplication, dead code, unneeded complexity</td><td>–</td><td>yes</td></tr>
+<tr><td>11</td><td>Test</td><td>tests check behaviour; missing tests; minimal vs full suite; flaky constructs</td><td>always</td><td>yes</td></tr>
+</table></div>
+
+<h3>Pareto rule</h3>
+<div class="table-wrap"><table>
+<tr><th>Round</th><th>Scope</th><th>Blocks the merge</th></tr>
+<tr><td>1</td><td>task diff</td><td>critical, major</td></tr>
+<tr><td>2</td><td>fix diff of round 1</td><td>critical, major</td></tr>
+<tr><td>3</td><td>fix diff of round 2</td><td>critical, lesson violations</td></tr>
+<tr><td>after 3</td><td>–</td><td>critical or lesson violation left: escalate to the coordinator</td></tr>
+</table></div>
+<p>Minor findings never block; they become drafts without a milestone, which the maintainer sorts at the
+hand-off. A critical or major finding is never deferred by an agent: at
+the Pareto limit (or a major left in round 3), and for anything left after the milestone review's single fix round,
+the task manager escalates "fix or defer" and the maintainer decides. Lesson violations block in every round.
+<span class="tag open">OPEN #6</span></p>
+
+<h3 id="lessons">Lessons learned</h3>
+<p>A basic mistake that caused, or would have caused, a major problem is recorded once in the project's
+lessons-learned file, so it doesn't happen again. Every review checks the diff against it.</p>
+<div class="table-wrap"><table>
+<tr><th>Question</th><th>Rule</th></tr>
+<tr><td>When is it a lesson?</td><td>All three: a simple, general cause that a one-line rule could have prevented
+(unchecked input, path built by string concatenation, missing error path, forgotten platform, test that checks
+nothing); a critical or major impact; confirmed (by the reviewer, a failed test, or found by the maintainer).</td></tr>
+<tr><td>Where do they come from?</td><td>Confirmed critical/major review findings, full-suite failures and
+regressions, findings of the maintainer's manual review (always checked: the agents missed them), failed merges
+into <code>main</code>, workflow incidents.</td></tr>
+<tr><td>Who records it, and when?</td><td>The task manager, right away (not at the retrospective), as a commit
+<code>lessons: L-&lt;n&gt; &lt;title&gt;</code> on the milestone branch. The maintainer sees every new lesson in the
+manual review.</td></tr>
+<tr><td>How is it used?</td><td>Workers read the active lessons before they implement. Each review-type sub-agent checks the
+diff against the active lessons of its review type; the milestone review checks all of them. A violation is
+reported with <code>lesson: L-&lt;n&gt;</code> and is never minor.</td></tr>
+<tr><td>What if it happens again?</td><td>Text was not enough: the retrospective turns the lesson into a test, lint
+rule or hook, or sharpens its rule. General lessons are proposed for the reviewer checklists, so other projects
+benefit too. At most 30 active lessons. <span class="tag open">OPEN #37</span></td></tr>
+</table></div>
+<pre><code>## L-&lt;n&gt;: &lt;short title&gt;
+
+- applies to: &lt;review types, e.g. code, security&gt; | workflow
+- severity:   critical | major (what it caused or would have caused)
+- seen:       M&lt;n&gt; TASK-&lt;id&gt; (&lt;task review | milestone review | full suite | manual review | merge into main&gt;), ...
+- mistake:    one sentence: the basic mistake
+- rule:       one sentence, checkable on a diff: what the code must (not) do
+- check:      how to spot it in a diff (pattern, search, question to ask)
+- status:     active | automated (&lt;test, lint rule or hook&gt;) | retired (&lt;reason&gt;)</code></pre>
+
+<h2 id="guards">8. Guardrails</h2>
+<h3>Hard rules (all agents)</h3>
+<ul>
+  <li>Never merge into, commit on or push <code>main</code>; never tick the manual review or set the milestone
+  review task Done.</li>
+  <li>Never rewrite commits already merged into the milestone branch; never touch the maintainer's main checkout.</li>
+  <li>Package installs only with <code>--ignore-scripts</code>; web access only to whitelisted domains.</li>
+  <li>Task files only through the backlog-ng CLI.</li>
+</ul>
+<h3>Loop guard (coordinator)</h3>
+<ul>
+  <li>The 4th message about one task between the same two agents without a state change is blocked, at most 2 rounds on the same
+  question; then the coordinator decides or asks the maintainer. Enforced by a hook.</li>
+  <li>Deadlock check: who waits for whom; cycles and idle agents with assigned work are resolved by the
+  coordinator.</li>
+  <li>Budget per task and milestone; a task over budget is stopped and escalated. <span class="tag open">OPEN #23</span></li>
+</ul>
+<h3>Goal check (coordinator)</h3>
+<ul>
+  <li>The maintainer's goal is stored verbatim at planning, with checkable success criteria, and never reworded.</li>
+  <li>Before the hand-off: evidence per goal statement (task, test, demo) or "not met". Missing work becomes gap
+  tasks; an unclear goal becomes a question to the maintainer.</li>
+</ul>
+
+<h2 id="retro">9. Retrospective and improvement</h2>
+<p>After every merge into <code>main</code>, the task manager writes <code>docs/retros/m&lt;n&gt;.md</code> and
+compares it with the previous milestones.</p>
+<div class="table-wrap"><table>
+<tr><th>Metric</th><th>Points to</th></tr>
+<tr><td>Findings of the manual review the agents missed</td><td>review checklists, review-type selection (most important signal)</td></tr>
+<tr><td>Dropped findings per review type</td><td>vague checklists</td></tr>
+<tr><td>Lessons learned seen again</td><td>automate the lesson (test, lint rule, hook) or sharpen its rule</td></tr>
+<tr><td>Review rounds per task, tasks at the Pareto limit</td><td>task sizing, acceptance criteria, worker skill</td></tr>
+<tr><td>Merge conflicts between parallel tasks</td><td>dispatch (overlap check), task cut</td></tr>
+<tr><td>Regressions found only by the full suite</td><td>content of the minimal suite</td></tr>
+<tr><td>Loop-guard events, escalations, stalled workers</td><td>message protocol, missing rules</td></tr>
+<tr><td>Time or tokens per task</td><td>overall efficiency</td></tr>
+</table></div>
+<ul>
+  <li>Only the <strong>1-3 issues with the biggest effect</strong> become an improvement task (label
+  <code>workflow</code>); the maintainer approves every skill change in the review app.</li>
+  <li>A consistency review checks that the skills don't contradict each other and the shared rules stay identical.</li>
+  <li>The next retrospective checks whether each improvement helped; if not, it is reverted.</li>
+  <li>Hard rules, the manual review and the hooks are never changed by an improvement.</li>
+</ul>
+
+<h2 id="open">10. Open topics</h2>
+<p>Still to brainstorm and decide. The skills contain a provisional rule for each <span class="tag open">OPEN #n</span>
+marker until the point is decided.</p>
+<div class="open-points">
+{{OPEN_POINTS}}
+</div>
+
+<footer>Multi-agent milestone workflow · project-agnostic tutorial · draft of 2026-11-11. Source files: workflow,
+agents and skills, open points (Markdown) and the installable <code>skills/</code> and <code>agents/</code> folders
+next to this file.</footer>
+</main>
+</body>
+</html>

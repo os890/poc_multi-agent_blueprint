@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"$HOME/.claude/milestone/hooks/guard-main.sh\"; [ -f \"$f\" ] || { echo \"milestone hook missing: $f (install it or remove the snippet)\" >&2; exit 2; }; bash \"$f\""
+          },
+          {
+            "type": "command",
+            "command": "f=\"$HOME/.claude/milestone/hooks/guard-rewrite.sh\"; [ -f \"$f\" ] || { echo \"milestone hook missing: $f (install it or remove the snippet)\" >&2; exit 2; }; bash \"$f\""
+          },
+          {
+            "type": "command",
+            "command": "f=\"$HOME/.claude/milestone/hooks/guard-install.sh\"; [ -f \"$f\" ] || { echo \"milestone hook missing: $f (install it or remove the snippet)\" >&2; exit 2; }; bash \"$f\""
+          },
+          {
+            "type": "command",
+            "command": "f=\"$HOME/.claude/milestone/hooks/guard-web.sh\"; [ -f \"$f\" ] || { echo \"milestone hook missing: $f (install it or remove the snippet)\" >&2; exit 2; }; bash \"$f\""
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch|WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"$HOME/.claude/milestone/hooks/guard-web.sh\"; [ -f \"$f\" ] || { echo \"milestone hook missing: $f (install it or remove the snippet)\" >&2; exit 2; }; bash \"$f\""
+          }
+        ]
+      }
+    ]
+  }
+}

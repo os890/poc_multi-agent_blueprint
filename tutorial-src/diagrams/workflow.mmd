@@ -1,0 +1,59 @@
+flowchart TD
+    H0([Maintainer: starts all agents]) --> H1([Maintainer: new milestone])
+    H1 --> C1[Coordinator: plan milestone and tasks]
+    C1 --> H2{Maintainer approves plan?}
+    H2 -->|no| C1
+    H2 -->|yes| T1[Task manager: create milestone branch from main]
+    T1 --> T2[Task manager: assign next ready task to a free worker]
+
+    T2 --> W1[Worker: implement on task branch, run minimal suite]
+    W1 --> R1["Reviewer: one fresh sub-agent per review type<br/>on the task diff only, then validates the findings<br/>always: logic, code, security, test<br/>if touched: architecture, data safety,<br/>cross-platform, dependencies, usability"]
+    R1 --> T3[Task manager: Pareto rule on the confirmed findings]
+    T3 -.->|minor| DR["Drafts without a milestone<br/>(maintainer sorts them)"]
+    T3 -.->|"basic mistake,<br/>major impact"| LL[(lessons-learned.md)]
+    LL -.->|"checked in every review,<br/>read by workers"| R1
+    T3 -.->|"Pareto limit:<br/>fix or defer?"| ES{{"Coordinator: maintainer decides"}}
+    T3 --> D1{Blocking findings?}
+    D1 -->|yes| W1
+    D1 -->|no| MQ["Task manager: merge queue into milestone branch<br/>(no commit before the minimal suite is green)"]
+    MQ -->|"conflict or red:<br/>abort, worker merges<br/>milestone branch in"| W1
+    MQ --> D2{Last task of the milestone done?}
+    D2 -->|no| T2
+
+    D2 -->|yes| SY{"main moved since<br/>the milestone branch?"}
+    SY -->|"yes: sync task<br/>(merge main in)"| FX
+    SY -->|no| FS["Full suite incl. e2e (test runner)<br/>+ milestone review of the milestone diff only:<br/>all 11 review types, one sub-agent each"]
+    FS --> D3{Green and no critical/major?}
+    D3 -->|"no: one fix round"| FX["Task manager: create fix, gap,<br/>sync or compensation task"]
+    D3 -.->|"left after the fix round:<br/>fix or defer?"| ES
+    FX --> T2
+    D3 -->|yes| GC{"Coordinator: goal of the<br/>maintainer met?"}
+    GC -->|"no: gap tasks"| FX
+    GC -->|yes| RC["Task manager: start the milestone review task,<br/>commit the report on its branch"]
+    RC --> C2[Coordinator: report milestone ready]
+    C2 --> H3{Maintainer: manual review}
+    H3 -->|reject| FX
+    H3 -->|approve| WM["Watcher: merge the milestone review branch<br/>(the whole milestone) into main"]
+    WM --> D4{Merge succeeded?}
+    D4 -->|yes| M[(main updated)]
+    M --> RE["Task manager: retrospective<br/>metrics vs previous milestones"]
+    RE --> D5{"Inefficiency or<br/>flow problem?"}
+    D5 -->|yes| SI["Task manager: skill improvement task<br/>reviewed by the maintainer"]
+    D5 -->|no| END([Milestone closed])
+    SI --> END
+    D4 -->|no| CP[Task manager: analyse watcher log, compensate]
+    CP -->|conflict or red gate| FX
+    CP -.->|technical: wait, retry or escalate| WM
+
+    classDef human fill:#fff3bf,stroke:#e8a400,color:#000
+    classDef coord fill:#d0ebff,stroke:#1c7ed6,color:#000
+    classDef tm fill:#e5dbff,stroke:#7048e8,color:#000
+    classDef worker fill:#d3f9d8,stroke:#2f9e44,color:#000
+    classDef review fill:#ffe3e3,stroke:#e03131,color:#000
+    classDef git fill:#f1f3f5,stroke:#495057,color:#000
+    class H0,H1,H2,H3,END human
+    class C1,C2,GC,ES coord
+    class T1,T2,T3,D1,D2,D3,D4,D5,SY,MQ,FX,DR,CP,RE,SI tm
+    class W1 worker
+    class R1,FS review
+    class RC,M,WM,LL git
